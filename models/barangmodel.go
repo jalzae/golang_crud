@@ -1,12 +1,13 @@
 package models
 
 import (
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Barang struct {
-	IdBarang       int       `gorm:"column:id_Barang;primary_key;auto_increment;not null"`
+	IdBarang       uuid.UUID `gorm:"type:char(36);primaryKey"`
 	NamaBarang     string    `form:"NamaBarang" json:"NamaBarang" xml:"NamaBarang" binding:"required" gorm:"column:Nama_Barang;type:varchar(100);not null;"`
 	UsersCreatedAt time.Time `gorm:"type:DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"`
 
@@ -37,7 +38,7 @@ func GetBarang(db *gorm.DB, Barangs *[]Barang) (err error) {
 	return nil
 }
 
-//get user by id
+// get user by id
 func GetBarangbyid(db *gorm.DB, Barangs *Barang, IdBarang string) (err error) {
 	err = db.Where("id_barang = ?", IdBarang).First(Barangs).Error
 	if err != nil {
@@ -46,13 +47,13 @@ func GetBarangbyid(db *gorm.DB, Barangs *Barang, IdBarang string) (err error) {
 	return nil
 }
 
-//update user
+// update user
 func UpdateBarang(db *gorm.DB, Barangs *Barang) (err error) {
 	db.Save(Barangs)
 	return nil
 }
 
-//delete user
+// delete user
 func DeleteBarang(db *gorm.DB, Barangs *Barang, IdBarang string) (err error) {
 	db.Where("id_barang = ?", IdBarang).Delete(Barangs)
 	return nil

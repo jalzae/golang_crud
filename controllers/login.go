@@ -8,11 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
+	"os"
 	"rest/config"
 	"rest/models"
+	res "rest/response"
 	"strings"
 	"time"
-	filter "rest/middleware"
 )
 
 type LoginController struct {
@@ -51,15 +52,53 @@ func (repository *LoginController) Login(c *gin.Context) {
 	atClaims["authorized"] = true
 	atClaims["user_id"] = username
 	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
-key := filter.Getkey()
+	key := os.Getenv("jwt_key")
 	sign := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), atClaims)
 	token, err := sign.SignedString([]byte(key))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusMethodNotAllowed, gin.H{
 			"message": err.Error(),
 		})
 		c.Abort()
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token, "message": "Successfully authenticated user"})
+
+}
+
+func (repository *LoginController) Register(c *gin.Context) {
+	var user models.Users
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	email := c.PostForm("email")
+	code := c.PostForm("code")
+
+	if email == "" {
+		user.UsersEmail = "example@gmail.com"
+	}
+	if code == "" {
+		user.UsersCode = "example@gmail.com"
+	}
+	if username != "" {
+		user.UsersName = username
+	}
+
+	hash := md5.Sum([]byte(password))
+	var s = hex.EncodeToString(hash[:])
+	encryptedpassword := sha1.Sum([]byte(s))
+	user.UsersPassword = hex.EncodeToString(encryptedpassword[:])
+
+	//check on user,if not exist create
+	row := models.CheckUser(repository.Db, &user, username)
+	if row == 0 {
+		err := models.CreateUser(repository.Db, &user)
+		if err != nil {
+			res.Res(c, 400, false, "Registration Failed", nil)
+			return
+		}
+		res.Res(c, http.StatusOK, true, "Registration Success", err)
+		return
+	}
+
+	res.Res(c, 400, false, "Username is exist!", nil)
 
 }
