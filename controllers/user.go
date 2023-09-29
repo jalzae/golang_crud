@@ -15,7 +15,6 @@ type UserRepo struct {
 
 func New() *UserRepo {
 	db := config.InitDb()
-	db.AutoMigrate(&models.Users{})
 	return &UserRepo{Db: db}
 }
 

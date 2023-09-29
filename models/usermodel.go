@@ -18,7 +18,6 @@ type Users struct {
 	UsersCreatedBy      string    `gorm:"type:varchar(100);not null"`
 	UsersLastmodifiedAt time.Time `gorm:"type:datetime;not null"`
 	UsersLastmodifiedBy string    `gorm:"type:varchar(100);not null"`
-	UsersProfilesid     int       `gorm:"type:int(10);not null"`
 	UsersUsertypesid    int       `gorm:"type:int(10);not null"`
 	Token               string    `gorm:"type:text"`
 }

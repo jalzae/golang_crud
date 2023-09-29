@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"rest/models"
 )
 
 const (
@@ -24,6 +25,8 @@ func InitDb() *gorm.DB {
 	} else {
 		Db = connectDBPostgree()
 	}
+
+	Db.AutoMigrate(&models.Migration{})
 	return Db
 }
 

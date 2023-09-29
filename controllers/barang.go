@@ -14,7 +14,6 @@ type BarangController struct {
 
 func Brg() *BarangController {
 	db := config.InitDb()
-	db.AutoMigrate(&models.Barang{})
 	return &BarangController{Db: db}
 }
 

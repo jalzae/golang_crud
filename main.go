@@ -2,18 +2,43 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"path/filepath"
-	"rest/service/response"
+	"rest/config"
+	"rest/helper"
 	"rest/routes"
+	"rest/service/response"
+	"rest/system"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
+	//CLI
+	if len(os.Args) > 3 {
+		command := os.Args[1]
+		switch command {
+		case "migrate:down":
+			if len(os.Args) != 3 {
+				fmt.Println("Usage: go run main.go migrate:down <filename>")
+				return
+			}
+
+			db := config.InitDb()
+			filename := os.Args[2]
+			if err := system.RollbackMigration(db, filename); err != nil {
+				fmt.Printf("Error rolling back migration '%s': %v\n", filename, err)
+			} else {
+				fmt.Printf("Migration '%s' has been rolled back\n", filename)
+			}
+		}
+	}
+
+	//main program
 	gin.SetMode(gin.DebugMode)
+	system.Migrate()
 	r := setupRouter()
 	_ = r.Run(":8080")
 }
@@ -57,7 +82,7 @@ func loadAndRunRouteFile(filePath string, r *gin.Engine, routeSetupFunctions map
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	r.Use(Cors())
+	r.Use(helper.Cors())
 
 	r.GET("/", func(c *gin.Context) {
 		res.Res(c, http.StatusOK, true, "Connected", nil)
@@ -65,24 +90,4 @@ func setupRouter() *gin.Engine {
 	setupRoutesFromFiles(r)
 	return r
 
-}
-
-// Cors handles cross-domain requests and supports options access
-func Cors() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		method := c.Request.Method
-
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token")
-		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS,PUT,DELETE")
-		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
-		c.Header("Access-Control-Allow-Credentials", "true")
-
-		//Release all OPTIONS methods
-		if method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-		}
-		// process request
-		c.Next()
-	}
 }
