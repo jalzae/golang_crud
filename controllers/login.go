@@ -11,7 +11,7 @@ import (
 	"os"
 	"rest/config"
 	"rest/models"
-	res "rest/response"
+	res "rest/service/response"
 	"strings"
 	"time"
 )

@@ -19,3 +19,12 @@ func Res(c *gin.Context, code int, status bool, message string, data interface{}
 
 	c.JSON(code, response)
 }
+
+func NotFound(c *gin.Context) {
+	response := gin.H{
+		"status":  false,
+		"message": "Not Found Page",
+	}
+
+	c.JSON(404, response)
+}

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"rest/response"
+	"rest/service/response"
 	"rest/routes"
 	"strings"
 
